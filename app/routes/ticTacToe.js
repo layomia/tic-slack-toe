@@ -44,8 +44,8 @@ module.exports = function(app, express) {
 		.post(function(req, res) {
 			console.log(req.body);
 			res.json({ 
-				'message': "Wassappppp!",
-				'response_type': "in_channel"
+				'response_type': "in_channel",
+				'text': "Wassappppp!"
 			});	
 		})
 
