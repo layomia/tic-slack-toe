@@ -34,5 +34,5 @@ app.use("/tictactoe", tttRoutes);
 
 // basic route for home page
 app.get("/", function(req, res) {
-	res.send("Welcome to \ttt")
+	res.send("Welcome to ttt")
 });

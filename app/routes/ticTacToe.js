@@ -2,17 +2,20 @@
 
 var Game = require("../models/game");
 
+var slackToken = "nqa4K3GFPfj2ULmjRCpEKuXS";
+var slackTeamIDs = [""];
+
 module.exports = function(app, express) {
 	
-	var apiRouter = express.Router();
+	var ticTacToeRouter = express.Router();
 	
 	// middleware to use for all requests
-	apiRouter.use(function(req, res, next) {
-		// authenticate users here
+	ticTacToeRouter.use(function(req, res, next) {
+		// authenticate request here
 		var token = req.body.token || req.param('token') || req.headers['x-access-token'];
 		
 		if (token) {
-			if (token != "nqa4K3GFPfj2ULmjRCpEKuXS") {
+			if (token != slackToken) {
 				// return appropriate error
 				return res.status(403).send({
 					success: false,
@@ -25,22 +28,26 @@ module.exports = function(app, express) {
 			return res.status(403).send({
 				// return appropriate error
 				success: false,
-				message: 'Failed to authenticate token.'
+				message: 'No token provided.'
 			});		
 		}
 	});
 	
-	//root response for api
-	//accessed at -url-/
-	apiRouter.get("/", function(req, res) {
+	//root response for tictactoe
+	//accessed at https://layomia-ttt.herokuapp.com/
+	ticTacToeRouter.get("/", function(req, res) {
 		res.json({ message: "Welcome to TicTacToe!" });
 	});
 	
-	apiRouter.route("/play")
+	ticTacToeRouter.route("/play")
 	
 		.post(function(req, res) {
-			res.json({ message: "Wassappppp!" });	
+			console.log(req.body);
+			res.json({ 
+				'message': "Wassappppp!",
+				'response_type': "in_channel"
+			});	
 		})
 
-	return apiRouter;
+	return ticTacToeRouter;
 }
