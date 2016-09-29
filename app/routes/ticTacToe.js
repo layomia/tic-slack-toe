@@ -35,8 +35,7 @@ function createGame(user, args) {
 	if (Object.keys(games).length != 0) {
 		return inValidResponse("A game is currently in play", "`/ttt end` to end game.");
 	} else if (args.length != 1) {
-		return inValidResponse("Invalid `create` command", "`/ttt create @username`.\
-							   Remember, you can't challenge yourself!");
+		return inValidResponse("Invalid `create` command", "`/ttt create @username`. Remember, you can't challenge yourself!");
 	}
 	
 	var p1 = '@' + user;
@@ -85,7 +84,6 @@ function makeMove(user, args) {
 	return {
 		'response_type': "in_channel",
 		'text': moveResponse,
-		// 'attachments': [{'text':"To make move, `/ttt move (board position)`."}]
 	};
 }
 
@@ -132,7 +130,7 @@ function endGame(user, args) {
 	
 	return {
 		'response_type': "in_channel",
-		'text': user + " has ended the game!",
+		'text': '@' + user + " has ended the game!",
 		'attachments': [{'text':"To start new game, `/ttt create @username`."}]
 	};
 }
@@ -166,6 +164,7 @@ function executeCommand(reqBody) {
 		return inValidResponse("Invalid command", "Enter `/ttt help` for commands.")
 	}
 	
+	// run appropriate command
 	return func(user, args);
 }
 
