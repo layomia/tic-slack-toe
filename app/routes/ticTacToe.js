@@ -17,37 +17,33 @@ function validUserName(str) {
 	return userNameRegex.test(str.substring(1))
 }
 
-var responses = {
-	'invalidCommand': { 
-		'text': "Invalid command",
-		'attachments': [{'text':"Try `/ttt help`."}]
-	}, 
-	'invalidCreate': { 
-		'text': "A game is currently in play",
-		'attachments': [{'text':"`/ttt quit` to quit game."}]
-	}, 
-	'invalidCreateCoPlayer': { 
-		'text': "Invalid `create` command",
-		'attachments': [{'text':"`/ttt create @username`. Remember, you can't challenge yourself!"}]
-	}, 
-};
+function validMove(str) {
+	var intStr = parseInt(str)
+	return intStr != NaN && (intStr >= 1 && intStr <= 9);
+}
+
+function inValidResponse(text, attachmentText) {
+	return { 
+		'text': text,
+		'attachments': [{'text':attachmentText}]
+	}
+}
 
 // this function assumes that the user_name for both players will not change while a game is being played
 function createGame(user, args) {
-	console.log(games);
-	// if games is not empty i.e, return 
+	// if games is not empty i.e there are games currently being played, return 
 	if (Object.keys(games).length != 0) {
-		//games['Steve'].makeMove()
-		return responses['invalidCreate'];
+		return inValidResponse("A game is currently in play", "`/ttt end` to end game.");
 	} else if (args.length != 1) {
-		return responses['invalidCreateCoPlayer'];
+		return inValidResponse("Invalid `create` command", "`/ttt create @username`.\
+							   Remember, you can't challenge yourself!");
 	}
 	
 	var p1 = '@' + user;
 	var p2 = args[0];
 	
 	if (!validUserName(p2) || p1 == p2) {
-		return responses['invalidCreateCoPlayer'];
+		return inValidResponse("Invalid `create` command", "`/ttt create @username`. Remember, you can't challenge yourself!");
 	}
 	
 	var game = new Game(p1, p2);
@@ -55,35 +51,106 @@ function createGame(user, args) {
 	games[p1] = game;
 	games[p2] = game;
 	
-	var boardStatus = game.displayBoard();
+	// this function call returns the status of the board. It is passed this false value
+	// to specify that this display doesn't follow the end of a game
+	// i.e. the function should let the users know who is next to play
+	var boardStatus = game.displayBoard(false);
+	
 	return {
 		'response_type': "in_channel",
 		'text': boardStatus,
-		'attachments': [{'text':"To make move, `/ttt play (board position)`."}]
+		'attachments': [{'text':"To make move, `/ttt move (board position)`."}]
 	};
 }
 
 function makeMove(user, args) {
-	return {};
+	var p = '@' + user;
+	
+	if (Object.keys(games).length == 0) {
+		return inValidResponse("No game is being played.", "`/ttt create @username` to start game.");
+	} else if (games[p] === undefined) {
+		return inValidResponse("You are not a part of the current game.", "`/ttt end` to end game.");
+	} else if (games[p].players[games[p].current] != p){
+		return inValidResponse("It is not your turn.", "Ping your opponent to make his move.");
+	} else if (args.length != 1 || !validMove(args[0])) {
+		return inValidResponse("Invalid move.", "`/ttt move (board position)` to make move.");
+	}
+	
+	var moveResponse = games[p].makeMove(parseInt(args[0]));
+	
+	if (moveResponse == "") {
+		return inValidResponse("That position is taken.", "Try again. :)");
+	}
+	
+	return {
+		'response_type': "in_channel",
+		'text': moveResponse,
+		// 'attachments': [{'text':"To make move, `/ttt move (board position)`."}]
+	};
 }
 
 function viewBoardStatus(user, args) {
-	return {};
+	// reject invalid request for non-existent games
+	if (Object.keys(games).length == 0) {
+		return inValidResponse("No game is being played.", "`/ttt create @username` to start game.");
+	} 
+	// reject any arguments passed
+	else if (args.length > 0) {
+		return inValidResponse("Invalid command syntax", "Try `/ttt view`");
+	}
+	
+	// get any game in games.
+	// For an extension where multiple games can be played in the same channel,
+	// the person who sends the request will have to specify the people playing the game he is requesting
+	// a status for. This assumes that a person can only play one game. If a person can play multiple games,
+	// perhaps exploring game IDs that are public would be a way to go.
+	var game = games[Object.keys(games)[0]];
+	
+	console.log(game);
+	
+	// get board status. false here tells the function to not behave like the game just ended
+	var boardStatus = game.displayBoard(false);
+	
+	return {
+		'text': boardStatus,
+		'attachments': [{'text':"To make move, `/ttt move (board position)`."}]
+	};
 }
 
-function quitGame(user, args) {
-	return {};
+function endGame(user, args) {
+	// reject invalid request for non-existent games
+	if (Object.keys(games).length == 0) {
+		return inValidResponse("No game is being played.", "`/ttt create @username` to start game.");
+	} 
+	// reject any arguments passed
+	else if (args.length > 0) {
+		return inValidResponse("Invalid command syntax", "Try `/ttt end`");
+	}
+	
+	// remove existing game objects
+	games = {};
+	
+	return {
+		'response_type': "in_channel",
+		'text': user + " has ended the game!",
+		'attachments': [{'text':"To start new game, `/ttt create @username`."}]
+	};
 }
 
 function help(user, args) {
-	return {};
+	if (args.length > 0) {
+		return inValidResponse("Invalid command syntax", "Try `/ttt help`");
+	}
+	return {
+		'text': "Start game: `/ttt create @username`\nMake move: `/ttt move (board position)`\nView game status: `/ttt view`\nEnd game: `/ttt end`\nGet command help: `/ttt help`"
+	};
 }
 
 var commands = {
 	'create': createGame,
 	'move': makeMove,
 	'view': viewBoardStatus, 
-	'quit': quitGame,
+	'end': endGame,
 	'help': help
 }
 
@@ -96,7 +163,7 @@ function executeCommand(reqBody) {
 	var func = commands[command];
 
 	if (func === undefined) {
-		return responses['invalidCommand'];
+		return inValidResponse("Invalid command", "Enter `/ttt help` for commands.")
 	}
 	
 	return func(user, args);
