@@ -5,6 +5,9 @@ var Game = require("../models/game");
 var slackToken = "nqa4K3GFPfj2ULmjRCpEKuXS";
 var slackTeamIDs = ["T2G3MTK3K", "T0001"];
 
+// this object maps channel_id's to Game() objects. One channel maps to one game.
+// for an extension where multiple games can be played in one channel, perhaps a mapping
+// from channels_id's to sets of Game() objects. One channel would map to a Set of games.
 var games = {};
 
 function validUserName(str) {
@@ -22,6 +25,9 @@ function validMove(str) {
 	return intStr != NaN && (intStr >= 1 && intStr <= 9);
 }
 
+// this function returns an ephemeral prompt to a user who has entered either an invalid command
+// or a command that is not allowed e.g. making a move when it is not your turn or trying to create
+// a game in a channel that already has a game playing.
 function inValidResponse(text, attachmentText) {
 	return { 
 		'text': text,
@@ -30,12 +36,12 @@ function inValidResponse(text, attachmentText) {
 }
 
 // this function assumes that the user_name for both players will not change while a game is being played
-function createGame(user, args) {
-	// if games is not empty i.e there are games currently being played, return 
-	if (Object.keys(games).length != 0) {
-		return inValidResponse("A game is currently in play", "`/ttt end` to end game.");
-	} else if (args.length != 1) {
+function createGame(user, channel, args) {
+	// if a game is already in play in the specified channel, return
+	if (args.length != 1) {
 		return inValidResponse("Invalid `create` command", "`/ttt create @username`. Remember, you can't challenge yourself!");
+	} else if (games[channel] != undefined) {
+		return inValidResponse("This channel already has a game in play.", "`/ttt end` to end game.");
 	}
 	
 	var p1 = '@' + user;
@@ -47,8 +53,7 @@ function createGame(user, args) {
 	
 	var game = new Game(p1, p2);
 	
-	games[p1] = game;
-	games[p2] = game;
+	games[channel] = game;
 	
 	// this function call returns the status of the board. It is passed this false value
 	// to specify that this display doesn't follow the end of a game
@@ -62,20 +67,30 @@ function createGame(user, args) {
 	};
 }
 
-function makeMove(user, args) {
+function makeMove(user, channel, args) {
+	// construct player @username
 	var p = '@' + user;
 	
-	if (Object.keys(games).length == 0) {
-		return inValidResponse("No game is being played.", "`/ttt create @username` to start game.");
-	} else if (games[p] === undefined) {
+	// reject invalid move command syntax
+	if (args.length != 1 || !validMove(args[0])) {
+		return inValidResponse("Invalid move syntax.", "`/ttt move (board position)` to make move.");
+	} 
+	// reject move in channel with no game
+	else if (games[channel] === undefined) {
+		return inValidResponse("No game is being played in this channel.", "`/ttt create @username` to start game.");
+	} 
+	// reject user trying to make move in game they are not a part of
+	// TO-DO: restructure how players are held in game object
+	else if (games[channel].players[0] != p && games[channel].players[1] != p) {
 		return inValidResponse("You are not a part of the current game.", "`/ttt end` to end game.");
-	} else if (games[p].players[games[p].current] != p){
+	}
+	// reject user trying to make move when it is not their turn
+	else if (games[channel].players[games[channel].current] != p){
 		return inValidResponse("It is not your turn.", "Ping your opponent to make his move.");
-	} else if (args.length != 1 || !validMove(args[0])) {
-		return inValidResponse("Invalid move.", "`/ttt move (board position)` to make move.");
 	}
 	
-	var moveResponse = games[p].makeMove(parseInt(args[0]));
+	// get boards response to player move
+	var moveResponse = games[channel].makeMove(parseInt(args[0]));
 	
 	if (moveResponse == "") {
 		return inValidResponse("That position is taken.", "Try again. :)");
@@ -87,24 +102,18 @@ function makeMove(user, args) {
 	};
 }
 
-function viewBoardStatus(user, args) {
-	// reject invalid request for non-existent games
-	if (Object.keys(games).length == 0) {
-		return inValidResponse("No game is being played.", "`/ttt create @username` to start game.");
-	} 
+function viewBoardStatus(user, channel, args) {
 	// reject any arguments passed
-	else if (args.length > 0) {
+	if (args.length > 0) {
 		return inValidResponse("Invalid command syntax", "Try `/ttt view`");
 	}
+	// reject invalid request for non-existent games
+	else if (games[channel] === undefined) {
+		return inValidResponse("No game is being played in this channel.", "`/ttt create @username` to start game.");
+	}
 	
-	// get any game in games.
-	// For an extension where multiple games can be played in the same channel,
-	// the person who sends the request will have to specify the people playing the game he is requesting
-	// a status for. This assumes that a person can only play one game. If a person can play multiple games,
-	// perhaps exploring game IDs that are public would be a way to go.
-	var game = games[Object.keys(games)[0]];
-	
-	console.log(game);
+	// get specified game
+	var game = games[channel];
 	
 	// get board status. false here tells the function to not behave like the game just ended
 	var boardStatus = game.displayBoard(false);
@@ -115,18 +124,19 @@ function viewBoardStatus(user, args) {
 	};
 }
 
-function endGame(user, args) {
-	// reject invalid request for non-existent games
-	if (Object.keys(games).length == 0) {
-		return inValidResponse("No game is being played.", "`/ttt create @username` to start game.");
-	} 
+
+function endGame(user, channel, args) {
 	// reject any arguments passed
-	else if (args.length > 0) {
+	if (args.length > 0) {
 		return inValidResponse("Invalid command syntax", "Try `/ttt end`");
 	}
+	// reject request for a non-existent game
+	else if (games[channel] === undefined) {
+		return inValidResponse("No game is being played in this channel.", "`/ttt create @username` to start game.");
+	}
 	
-	// remove existing game objects
-	games = {};
+	// end game
+	delete games[channel];
 	
 	return {
 		'response_type': "in_channel",
@@ -135,7 +145,7 @@ function endGame(user, args) {
 	};
 }
 
-function help(user, args) {
+function help(user, channel, args) {
 	if (args.length > 0) {
 		return inValidResponse("Invalid command syntax", "Try `/ttt help`");
 	}
@@ -150,10 +160,11 @@ var commands = {
 	'view': viewBoardStatus, 
 	'end': endGame,
 	'help': help
-}
+};
 
 function executeCommand(reqBody) {
 	var user = reqBody.user_name;
+	var channel = reqBody.channel_id;
 	var commandArray = reqBody.text.split(" ");
 	var command = commandArray[0];
 	var args = commandArray.splice(1);
@@ -165,7 +176,7 @@ function executeCommand(reqBody) {
 	}
 	
 	// run appropriate command
-	return func(user, args);
+	return func(user, channel, args);
 }
 
 module.exports = function(app, express) {
