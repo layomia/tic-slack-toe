@@ -3,9 +3,6 @@
 // get function to help parse and execute user command
 var helper = require('./helper');
 
-var slackToken = "nqa4K3GFPfj2ULmjRCpEKuXS";
-var slackTeamIDs = ["T2G3MTK3K", "T0001"];
-
 module.exports = function(app, express) {
 	var ticTacToeRouter = express.Router();
 	
@@ -13,17 +10,15 @@ module.exports = function(app, express) {
 	ticTacToeRouter.use(function(req, res, next) {
 		// authenticate request here
 		var token = req.body.token || req.param('token') || req.headers['x-access-token'];
-		var team_id = req.body.team_id || req.param('team_id') || req.headers['team_id'];
+		var team_id = req.body.team_id || req.param('team_id') || req.headers['x-access-team_id'];
 		
 		if (token && team_id) {
-			if (token != slackToken) {
-				// return appropriate error
+			if (token != process.env.TOKEN_FROM_SLACK) {
 				return res.status(403).send({
 					success: false,
 					message: 'Failed to authenticate token.'
 				});
-			} else if (!(slackTeamIDs.indexOf(team_id) > -1)) {
-				// return appropriate error
+			} else if (team_id != process.env.TEAM_ID) {
 				return res.status(403).send({
 					success: false,
 					message: 'Failed to authenticate team_id.'
@@ -33,7 +28,6 @@ module.exports = function(app, express) {
 			} 
 		} else {
 			return res.status(403).send({
-				// return appropriate error
 				success: false,
 				message: 'No token provided.'
 			});		
