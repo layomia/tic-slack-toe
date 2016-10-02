@@ -40,22 +40,24 @@ module.exports = {
 // this function creates a new game in a channel
 // this function assumes that the user_name for both players will not change while a game is being played
 function createGame(user, channel, args) {
-	// if a game is already in play in the specified channel, return
+	// invalid arguments
 	if (args.length != 1) {
 		return invalidResponse("Invalid `create` command", "`/ttt create @username`. Remember, you can't challenge yourself!");
-	} else if (games[channel] != undefined) {
+	}
+	// if a game is already in play in the specified channel, return
+	else if (games[channel] != undefined) {
 		return invalidResponse("This channel already has a game in play.", "`/ttt end` to end game.");
 	}
 	
+	// test if usernames are valid and are not equal
 	var p1 = '@' + user;
 	var p2 = args[0];
-	
 	if (!validUserName(p2) || p1 == p2) {
 		return invalidResponse("Invalid `create` command", "`/ttt create @username`. Remember, you can't challenge yourself!");
 	}
 	
+	// create new game
 	var game = new Game(p1, p2);
-	
 	games[channel] = game;
 	
 	// this function call returns the status of the board. It is passed this false value
@@ -106,6 +108,7 @@ function makeMove(user, channel, args) {
 	};
 }
 
+// this function allows channel user to view the board and see who is to play next
 function viewBoardStatus(user, channel, args) {
 	// reject any arguments passed
 	if (args.length > 0) {

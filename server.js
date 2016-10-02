@@ -29,7 +29,7 @@ var server = app.listen(process.env.PORT || 8080, function () {
 });
 
 // TicTacToe Route
-var tttRoutes  = require("./app/routes/ticTacToe")(app, express);
+var tttRoutes  = require("./app/routes/ticTacToe/ticTacToe")(app, express);
 app.use("/tictactoe", tttRoutes);
 
 // basic route for home page

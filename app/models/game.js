@@ -15,7 +15,7 @@ function Game(p1, p2) {
 
 // class methods
 
-// reinitialize board for new game
+// reinitialize board for new round
 Game.prototype.reinitialize = function() {
 	this.active = true;
 	this.board = [['1','2','3'], ['4','5','6'], ['7','8','9']];
@@ -24,15 +24,15 @@ Game.prototype.reinitialize = function() {
 
 // make move
 Game.prototype.makeMove = function(move) {
-	// reinitialize board if user restarts game
+	// reinitialize board if user starts a new round
 	if (!this.active) {
 		this.reinitialize();
 	}
 	
+	// convert board position entered by user to i,j coordinates
 	var i = -1;
 	var j = -1;
 	var end = "";
-	
 	for (var k = 1; k <= move; k++) {
 		if ((k - 1) % 3 == 0) {
 			i++;
@@ -59,24 +59,22 @@ Game.prototype.makeMove = function(move) {
 	// toggle current player
 	this.current = (this.current + 1) % 2;
 	
-	// get board display. true argument indicates that it should omit
-	// next player prompt
+	// get board display
 	var boardDisplay = this.displayBoard(endPrompt != "");
 	
 	return endPrompt + boardDisplay;
 };
 
 // display board
-// when gameEnd is true, it displays the board without next player prompt,
-// otherwise, it displays baord with next player prompt
+// when gameEnd is true, function will state that the next player will start the next game,
+// not just make the next move.
 Game.prototype.displayBoard = function(gameEnd) {
 	var board = "";
-	
 	var nextMove = " is to make a move next. " + "\n";
 	var nextGame = " is to start the next game. " + "\n";
-	
 	var prompt = "\n" + this.players[this.current] + (gameEnd ? nextGame : nextMove);
 	
+	// print board details
 	for (var i = 0; i < this.rows; i++){
         for (var j = 0; j < this.columns; j++){
             board += " " + "---";
@@ -133,7 +131,7 @@ Game.prototype.checkGameEnd = function() {
 		}
 	}
 	
-	// if win not detect and board isn't full
+	// if win not detected and board isn't full
 	if (!foundWin && this.numMoves != 9) {
 		return "";
 	}
