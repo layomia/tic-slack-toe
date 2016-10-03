@@ -59,7 +59,7 @@ module.exports = function(app, express) {
 			/*
 			add slight delay to response if list of people in the team has not been loaded
 			this allows helper.setUserList() to complete execution before proceeding.
-			This approach is rather 'hacky' and can be improved on with JavaScript promises.
+			This approach is rather 'hacky' and might be improved on with JavaScript promises.
 			*/
 			setTimeout(function() {
 				commandResponse = helper.executeCommand(req.body);	

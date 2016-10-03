@@ -6,6 +6,12 @@
     "@slack/client": "^3.6.0",
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
-    "morgan": "^1.7.0"
-  }
+    "morgan": "^1.7.0",
+    "request": "^2.75.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Layomi Akinrinade",
+  "description": "Tic-Tac-Toe! is a Slack Slash Command that allows team members to play a fun game of Tic-Tac-Toe in any channel."
 }

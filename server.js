@@ -36,3 +36,8 @@ app.use("/tictactoe", tttRoutes);
 app.get("/", function(req, res) {
 	res.send("Welcome to ttt")
 });
+
+// allow npm tests to close server
+exports.closeServer = function(){
+  server.close();
+};

@@ -8,7 +8,8 @@ It has the following dependencies:
 "@slack/client": "^3.6.0",
 "body-parser": "^1.15.2",
 "express": "^4.14.0",
-"morgan": "^1.7.0"
+"morgan": "^1.7.0",
+"request": "^2.75.0"
 
 Note that my instance of this project is running on Heroku and my server 'sleeps' after long periods of inactivity. It might take a couple of /ttt calls to get a response.
 
@@ -16,8 +17,8 @@ Note that my instance of this project is running on Heroku and my server 'sleeps
 Example
 -------
 
-'/ttt help'  displays list of commands
-'/ttt rules' displays list of rules
+`/ttt help`  displays list of commands
+`/ttt rules` displays list of rules
 
 
 Motivation
@@ -37,7 +38,7 @@ Installation
 Tests
 -----
 
-Describe and show how to run the tests with code examples.
+run `npm test`
 
 
 Contributors

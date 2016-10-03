@@ -14,7 +14,6 @@ var userList = new Set();
 // configuring slack web client to get list of usernames in team
 var WebClient = require('@slack/client').WebClient;
 var token = process.env.TOKEN_TO_SLACK || '';
-var web = new WebClient(token);
 
 // this contains all valid commands and their associated functions
 var commands = {
@@ -62,6 +61,7 @@ module.exports = {
 	},
 	// load list of usernames for team
 	setUserList: function() {
+		var web = new WebClient(token);
 		web.users.list(function userListCb(err, info) {
 			if (err) {
 				console.log('Error:', err);
