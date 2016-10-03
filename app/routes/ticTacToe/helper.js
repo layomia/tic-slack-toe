@@ -25,7 +25,6 @@ var commands = {
 	'help': help
 };
 
-
 // responses invoked by invalid commands
 var errorResponses = {
 	// invalid create commands
@@ -355,6 +354,7 @@ function validUserName(str) {
 
 // this function checks if a string is a valid representation of an integer between 1 and 9
 function validMove(str) {
-	var intStr = parseInt(str)
-	return intStr != NaN && (intStr >= 1 && intStr <= 9);
+	var intStr = parseInt(str);
+	
+	return intStr != NaN && str.length == 1 && (intStr >= 1 && intStr <= 9);
 }
