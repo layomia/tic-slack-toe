@@ -1,31 +1,46 @@
-Synopsis
+Introduction
+------------
 
-At the top of the file there should be a short introduction and/ or overview that explains what the project is. This description should match descriptions added for package managers (Gemspec, package.json, etc.)
+Tic-Tac-Toe! is a Slack Slash Command that allows team members to play a fun game of Tic-Tac-Toe in any channel.
 
-Code Example
+It has the following dependencies:
 
-Show what the library does as concisely as possible, developers should be able to figure out how your project solves their problem by looking at the code example. Make sure the API you are showing off is obvious, and that your code is short and concise.
+"@slack/client": "^3.6.0",
+"body-parser": "^1.15.2",
+"express": "^4.14.0",
+"morgan": "^1.7.0"
+
+Note that my instance of this project is running on Heroku and my server 'sleeps' after long periods of inactivity. It might take a couple of /ttt calls to get a response.
+
+
+Example
+-------
+
+'/ttt help'  displays list of commands
+'/ttt rules' displays list of rules
+
 
 Motivation
+----------
 
-A short description of the motivation behind the creation and maintenance of the project. This should explain why the project exists.
+This project was started as a coding challenge for an entry level engineering position with Slack Technologies.
 
 Installation
+------------
 
-Provide code examples and explanations of how to get the project.
+- Follow the setup instructions at https://api.slack.com/slash-commands
+- Set up an instance of this project on Heroku or similar platforms
+- Set the POST url for your slash command to the url you set up
+- Remember to set enviroment variables for your TOKEN_FROM_SLACK, TOKEN_TO_SLACK, and TEAM_ID
 
-API Reference
-
-Depending on the size of the project, if it is small and simple enough the reference docs can be added to the README. For medium size to larger projects it is important to at least provide a link to where the API reference docs live.
 
 Tests
+-----
 
 Describe and show how to run the tests with code examples.
 
+
 Contributors
+------------
 
-Let people know how they can dive into the project, include important links to things like issue trackers, irc, twitter accounts if applicable.
-
-License
-
-A short snippet describing the license (MIT, Apache, etc.)
+Written by Layomi Akinrinade - https://github.com/layomia

@@ -149,7 +149,7 @@ function createGame(user, channel, args) {
 	return {
 		'response_type': "in_channel",
 		'text': boardStatus,
-		'attachments': [{'text':"To make move, `/ttt move (board position)`."}]
+		'attachments': [{'text':"To make move, `/ttt move [board position]`."}]
 	};	
 }
 
@@ -281,11 +281,11 @@ function showRules(user, channel, args) {
 		return invalidResponse(errorResponse['mainText'], errorResponse['supportingText'])
 	}
 	
-	var gameRules = "1. You can't challenge someone who is not on your team.\n2. You can't play multiple games in the same channel.\n3. No player can change their username (not during play, not ever :|).";
+	var gameRules = "1. You can't challenge someone who is not on your team.\n2. You can't play multiple games in the same channel.\n3. No player can change their username (not during play, not ever :|).\n4. Any team member can end any game, even those they are not a part of.";
 	
 	// everything is good
 	return {
-		'text': "This game follows all the rules of Tic-Tac-Toe plus the following " + gameRules
+		'text': "This game follows all the rules of Tic-Tac-Toe plus the following\n" + gameRules
 	};
 }
 
