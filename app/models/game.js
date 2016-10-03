@@ -1,8 +1,10 @@
 //  game.js
+/*
+This class a is representation of a tic-tac-toe game board
+*/
 
 // Constructor
 function Game(p1, p2) {
-	this.active = true;
 	this.rows = 3;
 	this.columns = 3;
 	this.board = [['1','2','3'], ['4','5','6'], ['7','8','9']];
@@ -17,18 +19,12 @@ function Game(p1, p2) {
 
 // reinitialize board for new round
 Game.prototype.reinitialize = function() {
-	this.active = true;
 	this.board = [['1','2','3'], ['4','5','6'], ['7','8','9']];
 	this.numMoves = 0;
 }
 
 // make move
 Game.prototype.makeMove = function(move) {
-	// reinitialize board if user starts a new round
-	if (!this.active) {
-		this.reinitialize();
-	}
-	
 	// convert board position entered by user to i,j coordinates
 	var i = -1;
 	var j = -1;
@@ -65,9 +61,11 @@ Game.prototype.makeMove = function(move) {
 	return endPrompt + boardDisplay;
 };
 
-// display board
-// when gameEnd is true, function will state that the next player will start the next game,
-// not just make the next move.
+/*
+this function displays the board's status
+when gameEnd is true, function will state that the next player will start the next game, not just make the next move.
+this function also reinitializes the board when the game is over.
+*/
 Game.prototype.displayBoard = function(gameEnd) {
 	var board = "";
 	var nextMove = " is to make a move next. " + "\n";
@@ -93,13 +91,20 @@ Game.prototype.displayBoard = function(gameEnd) {
     
     board += "\n";
 	
+	// reinitialize board if game is over
+	if (gameEnd) {
+		this.reinitialize();
+	}
 	return board + prompt;
 };
 
-// this function finds out whether a win or a draw has occured
-// this function also changes winning configuration to upper case to highlight winning move
+/*
+this function finds out whether a win or a draw has occured
+*/
 Game.prototype.checkGameEnd = function() {
 	var foundWin = false;
+	var status = null;
+	var newGameOptions = "\n`/ttt move [board position]` to restart game, `/ttt view` to see fresh board.\n\n";
 	
 	// possible winning combinations for 3 * 3 matrix
 	var possibilities = [];
@@ -118,15 +123,11 @@ Game.prototype.checkGameEnd = function() {
 	possibilities.push([this.board[0][0], this.board[1][1], this.board[2][2]]);
 	possibilities.push([this.board[0][2], this.board[1][1], this.board[2][0]]);
 	
-	// check each 
+	// check each combination for a win
 	for (var p in possibilities) {
 		var poss = new Set(possibilities[p]);
 		// winning configuration detected
 		if (poss.size == 1 && (possibilities[p][0] == this.x || possibilities[p][0] == this.o)) {
-			// change winning configuration to upper case to highlight winning move
-			for (var po in possibilities[p]) {
-				possibilities[p][po] = possibilities[p][po].toUpperCase();
-			}
 			foundWin = true;
 		}
 	}
@@ -136,9 +137,9 @@ Game.prototype.checkGameEnd = function() {
 		return "";
 	}
 	
-	this.active = false;
+	status = foundWin ? this.players[this.current] + ", you win!" : "Draw game!";
 	
-	return foundWin ? this.players[this.current] + ", you win!\n\n" : "Draw game!\n\n";
+	return status + newGameOptions;
 }
 	
 // export the class
