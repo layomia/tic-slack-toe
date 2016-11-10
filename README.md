@@ -26,6 +26,7 @@ Motivation
 
 This project was started as a coding challenge for an entry level engineering position with Slack Technologies.
 
+
 Installation
 ------------
 

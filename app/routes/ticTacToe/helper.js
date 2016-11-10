@@ -48,7 +48,7 @@ var errorResponses = {
 	'invalidHelp':{'mainText':"Invalid `help` syntax.",'supportingText':"`/ttt help`"},
 	
 	// general invalid commands
-	'invalidCommand':{'mainText':"Invalid command",'supportingText':"Try `/ttt help`."},
+	'invalidCommand':{'mainText':"Invalid command.",'supportingText':"Try `/ttt help`."},
 	'invalidCommand-NoGameExists':{'mainText':"No game is being played in this channel.",'supportingText':"`/ttt create @username` to start game."},
 };
 
@@ -83,7 +83,7 @@ module.exports = {
 		var func = commands[command];
 
 		if (func === undefined) {
-			errorResponse = errorResponses['invalidCommand'];
+			var errorResponse = errorResponses['invalidCommand'];
 			return invalidResponse(errorResponse['mainText'], errorResponse['supportingText']);
 		}
 
@@ -152,12 +152,12 @@ function createGame(user, channel, args) {
 	};	
 }
 
-// this function is called when a user enters the 'make' command
+// this function is called when a user enters the 'move' command
 function makeMove(user, channel, args) {
 	// construct player @username
 	var p = '@' + user;
 	
-	// object to hold error response, if any are found
+	// object to hold error response, if any is found
 	var errorResponse = null;
 	
 	// object to hold board's response to player move
@@ -318,7 +318,7 @@ ADDITIONAL FUNCTIONS
 /*
 this function returns an ephemeral prompt to a user who has entered either an invalid command or a command that is not allowed
 e.g. making a move when it is not your turn or trying to create
-a game in a channel that already has a game playing.
+a game in a channel that already has a game in play
 */
 function invalidResponse(text, attachmentText) {
 	return { 
